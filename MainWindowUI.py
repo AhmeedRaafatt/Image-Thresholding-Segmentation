@@ -141,7 +141,9 @@ class MainWindowUI(QMainWindow):
         """Display an image on a QLabel"""
         if image is None:
             return
-            
+        # Clear any existing image first
+        label.clear()
+
         # Convert OpenCV image (BGR) to RGB for Qt
         if len(image.shape) == 3:  # Color image
             rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
