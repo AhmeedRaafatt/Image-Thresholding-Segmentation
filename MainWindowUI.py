@@ -42,8 +42,8 @@ class MainWindowUI(QMainWindow):
         self.load_image_btn.clicked.connect(self.on_load_image_threshold)
         self.apply_btn.clicked.connect(self.on_apply_threshold)
         self.thresholding_method.currentIndexChanged.connect(self.on_threshold_method_changed)
-        self.local_thresholding.toggled.connect(self.on_threshold_type_changed)
-        self.global_thresholding.toggled.connect(self.on_threshold_type_changed)
+        # self.local_thresholding.toggled.connect(self.on_threshold_type_changed)
+        # self.global_thresholding.toggled.connect(self.on_threshold_type_changed)
         
         # Segmentation tab connections
         self.load_btn.clicked.connect(self.on_load_image_segmentation)
@@ -94,14 +94,12 @@ class MainWindowUI(QMainWindow):
         
         # Get threshold settings
         method = self.thresholding_method.currentText().lower()
-        is_local = self.local_thresholding.isChecked()
-        threshold_type = "local" if is_local else "global"
         
-        logging.info(f"Applying thresholding with method: {method}, type: {threshold_type}")
+        logging.info(f"Applying thresholding with method: {method}")
         pub.sendMessage(Topics.APPLY_THRESHOLD, 
                         image=self.original_image, 
                         method=method,
-                        threshold_type=threshold_type)
+                        threshold_type="deprecated")  
     
     def on_apply_segmentation(self):
         if self.original_image is None:

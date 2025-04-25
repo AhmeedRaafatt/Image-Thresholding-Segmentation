@@ -56,7 +56,7 @@ QTabBar::tab:hover {
 }</string>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <property name="iconSize">
        <size>
@@ -222,6 +222,11 @@ border-radius:15px;</string>
                 </item>
                 <item>
                  <property name="text">
+                  <string>Local</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
                   <string>Otsu</string>
                  </property>
                 </item>
@@ -235,36 +240,7 @@ border-radius:15px;</string>
              </layout>
             </item>
             <item>
-             <layout class="QVBoxLayout" name="verticalLayout_9">
-              <item>
-               <widget class="QRadioButton" name="local_thresholding">
-                <property name="styleSheet">
-                 <string notr="true">margin-left:5px;
-color:#f5f1e9;
-font-weight:bold;
-font-size:20px;
-</string>
-                </property>
-                <property name="text">
-                 <string> Local</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QRadioButton" name="global_thresholding">
-                <property name="styleSheet">
-                 <string notr="true">margin-left:5px;
-color:#f5f1e9;
-font-weight:bold;
-font-size:20px;
-</string>
-                </property>
-                <property name="text">
-                 <string>Global</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
+             <layout class="QVBoxLayout" name="verticalLayout_9"/>
             </item>
            </layout>
           </item>
