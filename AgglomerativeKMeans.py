@@ -8,7 +8,7 @@ import numpy as np
 import logging
 
 
-class RegionGrowingKMeans:
+class AgglomerativeKMeans:
     def __init__(self):
         self.setup_subscriptions()
     
@@ -16,7 +16,7 @@ class RegionGrowingKMeans:
         pub.subscribe(self.on_apply_segmentation, Topics.APPLY_SEGMENTATION)
     
     def on_apply_segmentation(self, image, method):
-        if method.lower() not in ['region growing', 'k-means']:
+        if method.lower() not in ['agglomerative', 'k-means']:
             return
             
         logging.info(f"Applying {method} segmentation")
@@ -31,7 +31,7 @@ class RegionGrowingKMeans:
             result_image = image
             if method == "k-means":
                 result_image = self.kmeans_segmentation(image, k=3)
-            elif method == "region growing":
+            elif method == "agglomerative":
                 pass
 
 

@@ -3,8 +3,8 @@ from PyQt6.QtWidgets import QApplication
 from MainWindowUI import MainWindowUI
 import asyncio
 from qasync import QEventLoop
-from AgglomerativeMeanShift import AgglomerativeMeanShift 
-from RegionGrowingKMeans import RegionGrowingKMeans
+from RegionGrowingMeanShift import AgglomerativeMeanShift 
+from AgglomerativeKMeans import RegionGrowingKMeans
 from Thresholding import Thresholding
 
 async def main():

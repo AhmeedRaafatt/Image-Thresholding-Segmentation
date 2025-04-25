@@ -16,7 +16,7 @@ class AgglomerativeMeanShift:
         pub.subscribe(self.on_apply_segmentation, Topics.APPLY_SEGMENTATION)
     
     def on_apply_segmentation(self, image, method):
-        if method.lower() not in ['agglomerative', 'mean-shift']:
+        if method.lower() not in ['region growing', 'mean-shift']:
             return
             
         logging.info(f"Applying {method} segmentation")
