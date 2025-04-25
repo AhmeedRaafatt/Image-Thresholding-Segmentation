@@ -3,14 +3,14 @@ from PyQt6.QtWidgets import QApplication
 from MainWindowUI import MainWindowUI
 import asyncio
 from qasync import QEventLoop
-from RegionGrowingMeanShift import AgglomerativeMeanShift 
-from AgglomerativeKMeans import RegionGrowingKMeans
+from AgglomerativeKMeans import AgglomerativeKMeans
+from RegionGrowingMeanShift import AgglomerativeMeanShift
 from Thresholding import Thresholding
 
 async def main():
     # Initialize classes
+    agglomerative_kmeans = AgglomerativeKMeans()
     agglomerative_mean_shift = AgglomerativeMeanShift()
-    region_growing_kmeans = RegionGrowingKMeans()
     thresholding = Thresholding()
     ### 
     
