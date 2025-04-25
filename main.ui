@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1161</width>
+    <width>1271</width>
     <height>842</height>
    </rect>
   </property>
@@ -56,7 +56,7 @@ QTabBar::tab:hover {
 }</string>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <property name="iconSize">
        <size>
@@ -105,6 +105,12 @@ QTabBar::tab:hover {
           </item>
           <item>
            <widget class="QLabel" name="thresh_original_img">
+            <property name="maximumSize">
+             <size>
+              <width>612</width>
+              <height>522</height>
+             </size>
+            </property>
             <property name="styleSheet">
              <string notr="true">border:1px solid #f5f1e9;
 border-radius:10px;
@@ -133,6 +139,12 @@ padding:10px;</string>
           </item>
           <item>
            <widget class="QLabel" name="thresh_output_img">
+            <property name="maximumSize">
+             <size>
+              <width>612</width>
+              <height>522</height>
+             </size>
+            </property>
             <property name="styleSheet">
              <string notr="true">border:1px solid #f5f1e9;
 border-radius:10px;
@@ -394,6 +406,18 @@ background-color:#6b8299;
             </item>
             <item>
              <widget class="QLabel" name="seg_original_img">
+              <property name="minimumSize">
+               <size>
+                <width>612</width>
+                <height>522</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>612</width>
+                <height>522</height>
+               </size>
+              </property>
               <property name="styleSheet">
                <string notr="true">border:1px solid #f5f1e9;
 border-radius:10px;
@@ -419,6 +443,18 @@ padding:10px;</string>
             </item>
             <item>
              <widget class="QLabel" name="seg_output_img">
+              <property name="minimumSize">
+               <size>
+                <width>612</width>
+                <height>522</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>612</width>
+                <height>522</height>
+               </size>
+              </property>
               <property name="styleSheet">
                <string notr="true">border:1px solid #f5f1e9;
 border-radius:10px;

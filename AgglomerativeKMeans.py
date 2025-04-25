@@ -15,7 +15,7 @@ class AgglomerativeKMeans:
     def setup_subscriptions(self):
         pub.subscribe(self.on_apply_segmentation, Topics.APPLY_SEGMENTATION)
     
-    def on_apply_segmentation(self, image, method):
+    def on_apply_segmentation(self, image, method,seed_points):
         if method.lower() not in ['agglomerative', 'k-means']:
             return
             
