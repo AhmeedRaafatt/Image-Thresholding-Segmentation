@@ -205,8 +205,7 @@ class MainWindowUI(QMainWindow):
 
     def on_image_clicked(self, event):
         """Handle mouse clicks on the image label"""
-        if (self.current_tab == "segmentation" and 
-            self.seg_method_comboBox.currentText().lower() == "region growing"):
+        if (self.seg_method_comboBox.currentText().lower() == "region growing"):
             
             logging.info("Processing click for seed point")
             
