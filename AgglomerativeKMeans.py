@@ -18,30 +18,34 @@ class AgglomerativeKMeans:
     def setup_subscriptions(self):
         pub.subscribe(self.on_apply_segmentation, Topics.APPLY_SEGMENTATION)
     
-    def on_apply_segmentation(self, image, method,seed_points):
+    def on_apply_segmentation(self, image, method, seed_points, parameters=None):
         if method.lower() not in ['agglomerative', 'k-means']:
             return
             
-        logging.info(f"Applying {method} segmentation")
+        # Use default parameters if none provided
+        if parameters is None:
+            parameters = {}
+            
+        logging.info(f"Applying {method} segmentation with parameters: {parameters}")
         executor = concurrent.futures.ThreadPoolExecutor()
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        loop.run_in_executor(executor, self.apply, image, method)
-    
-    def apply(self, image, method):
-        try:
-            ###
-            result_image = image
-            if method == "k-means":
-                result_image = self.kmeans_segmentation(image, k=3)
-            elif method == "agglomerative":
-                result_image = self.agglomerative_segmentation(image, n_clusters=3)
+        loop.run_in_executor(executor, self.apply, image, method, parameters)
 
+    def apply(self, image, method, parameters):
+        try:
+            if method == "k-means":
+                # Extract parameters or use defaults
+                k = parameters.get('k', 3)
+                max_iters = parameters.get('max_iters', 100)
+                result_image = self.kmeans_segmentation(image, k=k, max_iters=max_iters)
+            elif method == "agglomerative":
+                # Extract parameters or use defaults
+                n_clusters = parameters.get('n_clusters', 20)
+                result_image = self.agglomerative_segmentation(image, n_clusters=n_clusters)
 
             print("image is returned")
             
-            
-            ###
             pub.sendMessage(
                 Topics.SEGMENTATION_RESULT,
                 result_image=result_image

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1271</width>
+    <width>1306</width>
     <height>842</height>
    </rect>
   </property>
@@ -105,10 +105,16 @@ QTabBar::tab:hover {
           </item>
           <item>
            <widget class="QLabel" name="thresh_original_img">
+            <property name="minimumSize">
+             <size>
+              <width>600</width>
+              <height>500</height>
+             </size>
+            </property>
             <property name="maximumSize">
              <size>
-              <width>612</width>
-              <height>522</height>
+              <width>600</width>
+              <height>500</height>
              </size>
             </property>
             <property name="styleSheet">
@@ -139,10 +145,16 @@ padding:10px;</string>
           </item>
           <item>
            <widget class="QLabel" name="thresh_output_img">
+            <property name="minimumSize">
+             <size>
+              <width>600</width>
+              <height>500</height>
+             </size>
+            </property>
             <property name="maximumSize">
              <size>
-              <width>612</width>
-              <height>522</height>
+              <width>600</width>
+              <height>500</height>
              </size>
             </property>
             <property name="styleSheet">
@@ -408,14 +420,14 @@ background-color:#6b8299;
              <widget class="QLabel" name="seg_original_img">
               <property name="minimumSize">
                <size>
-                <width>612</width>
-                <height>522</height>
+                <width>600</width>
+                <height>500</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>612</width>
-                <height>522</height>
+                <width>600</width>
+                <height>500</height>
                </size>
               </property>
               <property name="styleSheet">
@@ -445,14 +457,14 @@ padding:10px;</string>
              <widget class="QLabel" name="seg_output_img">
               <property name="minimumSize">
                <size>
-                <width>612</width>
-                <height>522</height>
+                <width>600</width>
+                <height>500</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>612</width>
-                <height>522</height>
+                <width>600</width>
+                <height>500</height>
                </size>
               </property>
               <property name="styleSheet">
@@ -509,58 +521,95 @@ padding:10px;</string>
              </spacer>
             </item>
             <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_15">
+             <layout class="QVBoxLayout" name="seg_settings_layout">
               <item>
-               <widget class="QLabel" name="label_2">
-                <property name="styleSheet">
-                 <string notr="true">margin-left:5px;
+               <layout class="QHBoxLayout" name="horizontalLayout_15">
+                <item>
+                 <widget class="QLabel" name="label_2">
+                  <property name="maximumSize">
+                   <size>
+                    <width>16777215</width>
+                    <height>50</height>
+                   </size>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">margin-left:5px;
 color:#f5f1e9;
 font-weight:bold;
 font-size:20px;
 margin-right:10px;</string>
-                </property>
-                <property name="text">
-                 <string>Method</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QComboBox" name="seg_method_comboBox">
-                <property name="styleSheet">
-                 <string notr="true">padding:15px 20px;
+                  </property>
+                  <property name="text">
+                   <string>Method</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QComboBox" name="seg_method_comboBox">
+                  <property name="maximumSize">
+                   <size>
+                    <width>16777215</width>
+                    <height>50</height>
+                   </size>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">padding:15px 20px;
 color:#f5f1e9;
 background-color:#3d4f61;
 margin-right:10px;
 font-weight:bold;
 font-size:15px;
 border-radius:15px;</string>
+                  </property>
+                  <item>
+                   <property name="text">
+                    <string>K-means</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>Region growing</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>agglomerative</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>mean-shift</string>
+                   </property>
+                  </item>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <widget class="QFrame" name="param_container">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>150</height>
+                 </size>
                 </property>
-                <item>
-                 <property name="text">
-                  <string>K-means</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Region growing</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>agglomerative</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>mean-shift</string>
-                 </property>
-                </item>
+                <property name="styleSheet">
+                 <string notr="true">border:1px solid #3d4f61;
+border-radius:10px;
+padding:5px;</string>
+                </property>
+                <property name="frameShape">
+                 <enum>QFrame::StyledPanel</enum>
+                </property>
+                <property name="frameShadow">
+                 <enum>QFrame::Raised</enum>
+                </property>
                </widget>
               </item>
              </layout>
             </item>
             <item>
-             <spacer name="horizontalSpacer_10">
+             <spacer name="horizontalSpacer_13">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
@@ -573,7 +622,7 @@ border-radius:15px;</string>
              </spacer>
             </item>
             <item>
-             <layout class="QVBoxLayout" name="verticalLayout_11">
+             <layout class="QVBoxLayout" name="buttons_layout_2">
               <item>
                <widget class="QPushButton" name="load_btn">
                 <property name="styleSheet">
@@ -619,7 +668,7 @@ background-color:#6b8299;
              </layout>
             </item>
             <item>
-             <spacer name="horizontalSpacer_11">
+             <spacer name="horizontalSpacer_14">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>

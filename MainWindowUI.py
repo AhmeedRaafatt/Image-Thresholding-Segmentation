@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QMainWindow
+from PyQt6.QtWidgets import QMainWindow, QSpinBox, QDoubleSpinBox, QLabel, QGridLayout, QHBoxLayout, QVBoxLayout
 from PyQt6 import uic
 from PyQt6.QtWidgets import QFileDialog
 from PyQt6.QtGui import QPixmap, QImage
@@ -29,6 +29,13 @@ class MainWindowUI(QMainWindow):
         self.current_tab = "threshold"  # Default tab
         self.seed_points = []
         self.seg_original_img.mousePressEvent = self.on_image_clicked
+        
+        # Parameter controls and layout
+        self.param_layout = QGridLayout()
+        self.param_container.setLayout(self.param_layout)
+        self.param_controls = {}
+        self.init_parameter_controls()
+        
         # Setup button connections
         self.setup_connections()
         
@@ -105,6 +112,113 @@ class MainWindowUI(QMainWindow):
                         method=method,
                         threshold_type=threshold_type)
     
+    def init_parameter_controls(self):
+        """Initialize all parameter controls for different segmentation methods"""
+        # Create all controls
+        # K-means parameters
+        self.param_controls["kmeans_k"] = self.create_spinbox(1, 20, 3, "Number of clusters (k):")
+        self.param_controls["kmeans_iterations"] = self.create_spinbox(1, 100, 100, "Max iterations:")
+        
+        # Agglomerative parameters
+        self.param_controls["agglomerative_clusters"] = self.create_spinbox(1, 30, 20, "Number of clusters:")
+        
+        # Mean-shift parameters
+        self.param_controls["meanshift_spatial"] = self.create_spinbox(5, 50, 20, "Spatial radius:")
+        self.param_controls["meanshift_color"] = self.create_spinbox(5, 100, 40, "Color radius:")
+        self.param_controls["meanshift_iterations"] = self.create_spinbox(1, 50, 20, "Max iterations:")
+        
+        # Region growing parameters
+        self.param_controls["region_threshold"] = self.create_spinbox(1, 50, 10, "Threshold:")
+        
+        # Hide all controls initially
+        self.hide_all_param_controls()
+        
+        # Show controls for initial method
+        method = self.seg_method_comboBox.currentText().lower()
+        self.show_param_controls_for_method(method)
+    
+    def create_spinbox(self, min_val, max_val, default_val, label_text):
+        """Helper to create a labeled spinbox"""
+        label = QLabel(label_text)
+        label.setStyleSheet("color:#f5f1e9; font-weight:bold; font-size:14px;")
+        
+        spinbox = QSpinBox()
+        spinbox.setMinimum(min_val)
+        spinbox.setMaximum(max_val)
+        spinbox.setValue(default_val)
+        spinbox.setStyleSheet("""
+            QSpinBox {
+                color: #f5f1e9;
+                background-color: #3d4f61;
+                padding: 5px;
+                border-radius: 5px;
+                font-size: 14px;
+            }
+            QSpinBox::up-button, QSpinBox::down-button {
+                width: 20px;
+                background-color: #6b8299;
+            }
+        """)
+        
+        return {"label": label, "spinbox": spinbox}
+    
+    def hide_all_param_controls(self):
+        """Hide all parameter controls"""
+        for control_set in self.param_controls.values():
+            control_set["label"].setVisible(False)
+            control_set["spinbox"].setVisible(False)
+            
+            # Remove from layout if already added
+            self.param_layout.removeWidget(control_set["label"])
+            self.param_layout.removeWidget(control_set["spinbox"])
+    
+    def show_param_controls_for_method(self, method):
+        """Show parameter controls for the selected method"""
+        self.hide_all_param_controls()
+        
+        row = 0
+        if method == "k-means":
+            # Add K-means controls
+            self.add_control_to_layout(self.param_controls["kmeans_k"], row)
+            row += 1
+            self.add_control_to_layout(self.param_controls["kmeans_iterations"], row)
+            
+        elif method == "agglomerative":
+            # Add Agglomerative controls
+            self.add_control_to_layout(self.param_controls["agglomerative_clusters"], row)
+            
+        elif method == "mean-shift":
+            # Add Mean-shift controls
+            self.add_control_to_layout(self.param_controls["meanshift_spatial"], row)
+            row += 1
+            self.add_control_to_layout(self.param_controls["meanshift_color"], row)
+            row += 1
+            self.add_control_to_layout(self.param_controls["meanshift_iterations"], row)
+            
+        elif method == "region growing":
+            # Add Region growing controls
+            self.add_control_to_layout(self.param_controls["region_threshold"], row)
+    
+    def add_control_to_layout(self, control_set, row):
+        """Add a control set to the layout at the specified row"""
+        self.param_layout.addWidget(control_set["label"], row, 0)
+        self.param_layout.addWidget(control_set["spinbox"], row, 1)
+        control_set["label"].setVisible(True)
+        control_set["spinbox"].setVisible(True)
+    
+    def on_segmentation_method_changed(self, index):
+        method = self.seg_method_comboBox.currentText().lower()
+        self.seed_points.clear()  # Clear seed points when method changes
+        logging.info(f"Segmentation method changed to: {method}, seed points cleared")
+        
+        # Show appropriate parameter controls
+        self.show_param_controls_for_method(method)
+        
+        # Reset the display to original image
+        if self.original_image is not None:
+            self.display_image(self.seg_original_img, self.original_image)
+        pub.sendMessage(Topics.SEGMENTATION_METHOD_CHANGED, method=method)
+    
     def on_apply_segmentation(self):
         if self.original_image is None:
             logging.warning("No image loaded for segmentation")
@@ -113,11 +227,29 @@ class MainWindowUI(QMainWindow):
         # Get segmentation method
         method = self.seg_method_comboBox.currentText().lower()
         
-        logging.info(f"Applying segmentation with method: {method}")
+        # Get parameters based on the method
+        parameters = {}
+        if method == "k-means":
+            parameters["k"] = self.param_controls["kmeans_k"]["spinbox"].value()
+            parameters["max_iters"] = self.param_controls["kmeans_iterations"]["spinbox"].value()
+            
+        elif method == "agglomerative":
+            parameters["n_clusters"] = self.param_controls["agglomerative_clusters"]["spinbox"].value()
+            
+        elif method == "mean-shift":
+            parameters["spatial_radius"] = self.param_controls["meanshift_spatial"]["spinbox"].value()
+            parameters["color_radius"] = self.param_controls["meanshift_color"]["spinbox"].value()
+            parameters["max_iterations"] = self.param_controls["meanshift_iterations"]["spinbox"].value()
+            
+        elif method == "region growing":
+            parameters["threshold"] = self.param_controls["region_threshold"]["spinbox"].value()
+        
+        logging.info(f"Applying segmentation with method: {method}, parameters: {parameters}")
         pub.sendMessage(Topics.APPLY_SEGMENTATION, 
                         image=self.original_image, 
                         method=method,
-                        seed_points=self.seed_points.copy())  # Pass seed points as a named parameter
+                        seed_points=self.seed_points.copy(),
+                        parameters=parameters)  # Add parameters
         
         self.seed_points.clear()  # Clear seed points after applying
         
@@ -135,15 +267,6 @@ class MainWindowUI(QMainWindow):
         threshold_type = "local" if self.local_thresholding.isChecked() else "global"
         logging.info(f"Threshold type changed to: {threshold_type}")
         pub.sendMessage(Topics.THRESHOLD_TYPE_CHANGED, threshold_type=threshold_type)
-    
-    def on_segmentation_method_changed(self, index):
-        method = self.seg_method_comboBox.currentText().lower()
-        self.seed_points.clear()  # Clear seed points when method changes
-        logging.info(f"Segmentation method changed to: {method}, seed points cleared")
-        # Reset the display to original image
-        if self.original_image is not None:
-            self.display_image(self.seg_original_img, self.original_image)
-        pub.sendMessage(Topics.SEGMENTATION_METHOD_CHANGED, method=method)
     
     def on_threshold_result(self, result_image):
         self.display_image(self.thresh_output_img, result_image)
