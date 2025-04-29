@@ -53,56 +53,67 @@ class Thresholding:
             logging.error(f"Error with method {method}: {str(e)}")
 
 
+
     def otsu_threshold(self, image, threshold_type):
         if len(image.shape) > 2:
-            gray = np.dot(image[..., :3], [0.299, 0.587, 0.114])
+            grayImage = np.dot(image[..., :3], [0.299, 0.587, 0.114])
         else:
-            gray = image.copy()
+            grayImage = image.copy()
         
-        gray = cv2.normalize(gray, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
+        grayImage = cv2.normalize(grayImage, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
 
-        def compute_otsu_criteria(img, th):
-            thresholded_im = np.zeros(img.shape)
-            thresholded_im[img >= th] = 1
+        def compute_otsu_variance(image, threshold):
+            thresholded_image = np.zeros(image.shape)
+            thresholded_image[image >= threshold] = 1
 
-            nb_pixels = img.size
-            nb_pixels1 = np.count_nonzero(thresholded_im)
-            weight1 = nb_pixels1 / nb_pixels
+            weight1 = len(thresholded_image[thresholded_image == 1]) / len(thresholded_image)
             weight0 = 1 - weight1
 
             if weight1 == 0 or weight0 == 0:
                 return np.inf
 
-            val_pixels1 = img[thresholded_im == 1]
-            val_pixels0 = img[thresholded_im == 0]
+            val_pixels_of_1 = image[thresholded_image == 1]
+            val_pixels_of_0 = image[thresholded_image == 0]
 
-            var1 = np.var(val_pixels1) if len(val_pixels1) > 0 else 0
-            var0 = np.var(val_pixels0) if len(val_pixels0) > 0 else 0
+            if len(val_pixels_of_1) > 0:
+                var1 = np.var(val_pixels_of_1) 
+            else: 
+                var1 = 0
 
-            return weight0 * var0 + weight1 * var1
+            if len(val_pixels_of_0) > 0:
+                var0 = np.var(val_pixels_of_0) 
+            else:
+                var0 = 0
+
+            badness = weight0 * var0 + weight1 * var1
+            return badness
+
+
 
         if threshold_type == "global":
-            threshold_range = range(np.max(gray) + 1)
-            criteria = np.array([compute_otsu_criteria(gray, th) for th in threshold_range])
+            threshold_range = range(np.max(grayImage) + 1)                
+            criteria = np.array([compute_otsu_variance(grayImage, threshold) for threshold in threshold_range])
             best_threshold = threshold_range[np.argmin(criteria)]
 
-            result = gray.copy()
+            result = grayImage.copy()
             result[result < best_threshold] = 0
             result[result >= best_threshold] = 255
+
 
         elif threshold_type == "local":
             block_size = 40
             sigma = 1
-            blurred = cv2.GaussianBlur(gray, (0, 0), sigmaX=sigma, sigmaY=sigma)
-            height, width = gray.shape
-            result = np.zeros_like(gray)
+            blurredImage = cv2.GaussianBlur(grayImage, (0, 0), sigmaX=sigma, sigmaY=sigma)
+            height, width = grayImage.shape
+            result = np.zeros_like(grayImage)
 
             for y in range(0, height, block_size):
                 for x in range(0, width, block_size):
-                    block = blurred[y:min(y + block_size, height), 
+                    block = blurredImage[y:min(y + block_size, height), 
                                   x:min(x + block_size, width)]
+                    
                     threshold_range = range(np.min(block), np.max(block) + 1)
-                    criteria = np.array([compute_otsu_criteria(block, th) for th in threshold_range])
+                    criteria = np.array([compute_otsu_variance(block, th) for th in threshold_range])
                     best_threshold = threshold_range[np.argmin(criteria)]
 
                     binary_block = np.zeros_like(block)
@@ -123,74 +134,67 @@ class Thresholding:
 
     def optimal_threshold(self, image, threshold_type):
         if len(image.shape) > 2:
-            gray = np.dot(image[..., :3], [0.299, 0.587, 0.114])
+            grayImage = np.dot(image[..., :3], [0.299, 0.587, 0.114])
         else:
-            gray = image.copy()
+            grayImage = image.copy()
 
         if threshold_type == "global":
-            # Initialize threshold with midpoint of intensity range
-            min_intensity = np.min(gray)
-            max_intensity = np.max(gray)
+            min_intensity = np.min(grayImage)
+            max_intensity = np.max(grayImage)
+            # Initial Threshold
             threshold = (min_intensity + max_intensity) / 2
 
-            # Iterate until convergence
             while True:
-                # Classify pixels into foreground and background
-                foreground_pixels = gray[gray > threshold]
-                background_pixels = gray[gray <= threshold]
+                foreground_pixels = grayImage[grayImage > threshold]
+                background_pixels = grayImage[grayImage <= threshold]
 
-                # Calculate mean intensity values
                 mean_foreground = np.mean(foreground_pixels)
                 mean_background = np.mean(background_pixels)
 
-                # Calculate new threshold
                 new_threshold = (mean_foreground + mean_background) / 2
 
-                # Check convergence
                 if np.abs(new_threshold - threshold) < 1e-3:
                     break
 
                 threshold = new_threshold
 
-            result = (gray > threshold).astype(np.uint8) * 255
+            result = (grayImage > threshold).astype(np.uint8) * 255
 
         elif threshold_type == "local":
-            block_size = 40
-            height, width = gray.shape
-            result = np.zeros_like(gray, dtype=np.uint8)
+            window_size = 40
+            height, width = grayImage.shape
+            result = np.zeros_like(grayImage, dtype=np.uint8)
 
-            for y in range(0, height, block_size):
-                for x in range(0, width, block_size):
-                    # Get current block
-                    block = gray[y:y + block_size, x:x + block_size]
+            for y in range(0, height, window_size):
+                for x in range(0, width, window_size):
+                    window = grayImage[y:y + window_size, x:x + window_size]
                     
-                    # Skip empty blocks
-                    if np.all(block == block[0, 0]):
+                    if np.all(window == window[0, 0]):
                         continue
 
-                    # Initialize threshold for block
-                    threshold = np.mean(block)
+                    threshold = np.mean(window)
 
-                    # Iterate until convergence
                     while True:
-                        foreground_pixels = block[block > threshold]
-                        background_pixels = block[block <= threshold]
+                        foreground_pixels = window[window > threshold]
+                        background_pixels = window[window <= threshold]
 
                         if len(foreground_pixels) == 0 or len(background_pixels) == 0:
                             break
 
                         mean_foreground = np.mean(foreground_pixels)
                         mean_background = np.mean(background_pixels)
+
                         new_threshold = (mean_foreground + mean_background) / 2
 
+                        # Break the loop if the new threshold is too close to the old one (Reach Convergence)
                         if np.abs(new_threshold - threshold) < 1e-3:
                             break
 
                         threshold = new_threshold
 
-                    # Apply threshold to block
-                    block_height, block_width = block.shape
-                    result[y:y + block_height, x:x + block_width] = (block > threshold).astype(np.uint8) * 255
+                    window_height, window_width = window.shape
+                    # update the result image with the binary thresholded window
+                    result[y:y + window_height, x: x + window_width] = (window > threshold).astype(np.uint8) * 255
 
         else:
             raise ValueError(f"Unknown threshold type: {threshold_type}")
@@ -202,16 +206,33 @@ class Thresholding:
     
     def spectral_threshold(self, image, threshold_type):
         if len(image.shape) > 2:
-            gray = np.dot(image[..., :3], [0.299, 0.587, 0.114])
+            grayImage = np.dot(image[..., :3], [0.299, 0.587, 0.114])
         else:
-            gray = image.copy()
+            grayImage = image.copy()
         
-        gray = (gray * 255).astype(np.uint8)
+        grayImage = (grayImage * 255).astype(np.uint8)
 
         if threshold_type == "global":
-            return self.spectral_global(gray)[0]
+            thresholds = self.get_thresholds(grayImage)
+            thresholded_img = self.spectral_double_thresholding(grayImage, thresholds)
+            return thresholded_img
+        
         elif threshold_type == "local":
-            return self.spectral_local(gray)[0]
+            local_threshold = np.zeros_like(grayImage)
+            window_size = 40
+            for i in range(0, grayImage.shape[0], window_size):
+                for j in range(0, grayImage.shape[1], window_size):
+                    window_height = min(window_size, grayImage.shape[0] - i)
+                    window_width = min(window_size, grayImage.shape[1] - j)
+                    sub_image = grayImage[i:i+window_height, j:j+window_width]
+
+                    thresholds = self.get_thresholds(sub_image)
+
+                    thresholded_window = self.spectral_double_thresholding(sub_image, thresholds)
+                    local_threshold[i:i+window_height, j:j+window_width] = thresholded_window
+
+            return local_threshold
+
         else:
             raise ValueError(f"Unknown threshold type: {threshold_type}")
 
@@ -220,15 +241,15 @@ class Thresholding:
         histogram = cv2.calcHist([image], [0], None, [256], [0, 256])
         cumulative_sum = np.cumsum(histogram)
         total = image.shape[0] * image.shape[1]
-        tau1 = 0.0
-        tau2 = 0.0
+        tau1 = 0
+        tau2 = 0
         alpha = 0.5
 
         background_pixels = 0
         foreground_pixels = 0
-        background_pixels_sum = 0.0
-        foreground_pixels_sum = 0.0
-        max_variance = 0.0
+        background_pixels_sum = 0
+        foreground_pixels_sum = 0
+        max_variance = 0
         threshold_1 = 0
         threshold_2 = 0
 
@@ -263,33 +284,15 @@ class Thresholding:
         return threshold_1, threshold_2
 
 
-    def spectral_global(self, img):
-        thresholds = self.get_thresholds(img)
-        thresholded_img = self.double_spectral_thresholding(img, thresholds)
-        return [thresholded_img]
-
-    def spectral_local(self, image, block_size=70):
-        local_threshold = np.zeros_like(image)
-        for i in range(0, image.shape[0], block_size):
-            for j in range(0, image.shape[1], block_size):
-                block_height = min(block_size, image.shape[0] - i)
-                block_width = min(block_size, image.shape[1] - j)
-                sub_image = image[i:i+block_height, j:j+block_width]
-
-                thresholds = self.get_thresholds(sub_image)
-
-                local_threshold[i:i+block_height, j:j+block_width] = self.double_spectral_thresholding(sub_image, thresholds)
-
-        return [local_threshold]
-
-    def double_spectral_thresholding(self, img, thresholds):
-        thresholded_img = np.zeros_like(img)
-        for i in range(img.shape[0]):
-            for j in range(img.shape[1]):
-                if img[i, j] <= thresholds[1]:
-                    thresholded_img[i, j] = 0
-                elif thresholds[1] < img[i, j] <= thresholds[0]:
-                    thresholded_img[i, j] = 128
+    def spectral_double_thresholding(self, image, thresholds):
+        thresholded_image = np.zeros_like(image)
+        for i in range(image.shape[0]):
+            for j in range(image.shape[1]):
+                if image[i, j] <= thresholds[1]:
+                    thresholded_image[i, j] = 0
+                elif thresholds[1] < image[i, j] <= thresholds[0]:
+                    thresholded_image[i, j] = 128
                 else:
-                    thresholded_img[i, j] = 255
-        return thresholded_img
+                    thresholded_image[i, j] = 255
+        
+        return thresholded_image
